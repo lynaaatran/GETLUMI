@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi — The Intelligence Layer for Modern MedSpas</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+:root{
+  /* ── PALETTE ──
+     Core warmth: cream through espresso creates a tonal range that mirrors
+     high-end medspa interiors. Gold is used SPARINGLY as an accent — 
+     never as a background, only for emphasis moments.
+  */
+  --ink:#1A1310;
+  --espresso:#3A2820;
+  --mocha:#7A5C44;
+  --taupe:#A89078;
+  --sand:#C8B8A4;
+  --parchment:#EDE6DC;
+  --cream:#F8F4EE;
+  --white:#FFFDF9;
+  --gold:#C08E32;
+  --gold-l:#D4A848;
+  --gold-d:#96701E;
+  --border:rgba(192,142,50,.14);
+  --border-s:rgba(192,142,50,.08);
+  --sage:#5E8A62;
+  --blush:#C4786A;
+  --sky:#5A8CA8;
+  --r:#B43030;--r-bg:#FAEAE8;--r-br:rgba(180,48,48,.18);
+  --a:#946010;--a-bg:#F9F0DA;--a-br:rgba(148,96,16,.22);
+  --g:#2C7A4E;--g-bg:#E4F4EC;--g-br:rgba(44,122,78,.18);
+  --b:#186098;--b-bg:#E2EEF8;--b-br:rgba(24,96,152,.16);
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Instrument Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+body{
+  font-family:var(--sans);background:var(--cream);color:var(--ink);
+  font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;position:relative;
+}
+/* Subtle grain texture for depth — not flat, not noisy */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  opacity:.028;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:180px;
+}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--cream)}
+::-webkit-scrollbar-thumb{background:var(--sand);border-radius:2px}
+
+/* ═══════════════════════════════════════════════
+   NAV — Sticky, minimal, single CTA
+   Research: Remove all competing links. One goal.
+   ═══════════════════════════════════════════════ */
+nav{
+  background:rgba(248,244,238,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border-s);padding:0 56px;height:62px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:200;transition:all .35s;
+}
+nav.scrolled{box-shadow:0 1px 32px rgba(26,19,16,.06);border-bottom-color:transparent}
+.nav-logo{font-family:var(--serif);font-size:22px;letter-spacing:-0.02em;color:var(--espresso);font-weight:500}
+.nav-logo span{color:var(--gold);font-style:italic}
+.nav-right{display:flex;align-items:center;gap:28px}
+.nav-link{font-size:12px;font-weight:500;color:var(--taupe);text-decoration:none;letter-spacing:.04em;transition:color .2s;cursor:pointer;text-transform:uppercase}
+.nav-link:hover{color:var(--espresso)}
+.nav-cta{
+  background:var(--espresso);color:var(--cream);font-family:var(--sans);
+  font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  padding:10px 26px;border:none;border-radius:100px;cursor:pointer;transition:all .25s var(--ease);
+}
+.nav-cta:hover{background:var(--gold);transform:translateY(-1px);box-shadow:0 8px 24px rgba(192,142,50,.25)}
+@media(max-width:640px){.nav-link{display:none}nav{padding:0 24px}}
+
+/* ═══════════════════════════════════════════════
+   HERO
+   Research: 80% read only the headline. Benefit-first.
+   Above the fold: headline + sub + 1 CTA + proof stats.
+   Generous whitespace. No clutter.
+   ═══════════════════════════════════════════════ */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:120px 2rem 80px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 10%,rgba(192,142,50,.07) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 30% at 80% 80%,rgba(94,138,98,.04) 0%,transparent 50%);
+  pointer-events:none;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(192,142,50,.06);border:1px solid rgba(192,142,50,.18);
+  color:var(--gold);font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;
+  padding:7px 20px;border-radius:100px;margin-bottom:2.8rem;
+  position:relative;z-index:1;
+}
+.e-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:pulse 2.4s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.15}}
+.hero h1{
+  font-family:var(--serif);font-size:clamp(48px,8vw,96px);
+  line-height:.96;letter-spacing:-0.04em;max-width:800px;
+  margin-bottom:1.6rem;color:var(--espresso);font-weight:500;
+  position:relative;z-index:1;
+}
+.hero h1 em{font-style:italic;color:var(--gold)}
+.hero-sub{
+  font-size:16.5px;color:var(--mocha);max-width:460px;
+  margin-bottom:2.6rem;font-weight:400;line-height:1.72;
+  position:relative;z-index:1;letter-spacing:.008em;
+}
+.hero-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
+.btn-primary{
+  background:var(--espresso);color:var(--cream);font-family:var(--sans);
+  font-size:13px;font-weight:600;padding:15px 36px;border:none;
+  border-radius:100px;cursor:pointer;transition:all .28s var(--ease);
+  letter-spacing:.03em;
+}
+.btn-primary:hover{background:var(--gold);transform:translateY(-2px);box-shadow:0 16px 40px rgba(192,142,50,.28)}
+.btn-ghost{
+  background:transparent;color:var(--mocha);font-family:var(--sans);
+  font-size:13px;font-weight:500;padding:15px 28px;
+  border:1px solid rgba(192,142,50,.2);border-radius:100px;
+  cursor:pointer;transition:all .2s;
+}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+/* Hero proof — value props + integration logos */
+.hero-proof{margin-top:4.5rem;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:680px}
+.hero-vals{
+  display:flex;width:100%;padding-bottom:28px;
+  border-bottom:1px solid var(--border-s);
+}
+.hv{flex:1;text-align:center;padding:0 24px;position:relative}
+.hv+.hv::before{
+  content:'';position:absolute;left:0;top:4px;bottom:4px;width:1px;
+  background:var(--gold);opacity:.18;
+}
+.hv-strong{
+  font-family:var(--serif);font-size:22px;color:var(--espresso);
+  line-height:1.1;letter-spacing:-.02em;font-weight:500;margin-bottom:5px;
+}
+.hv-strong em{font-style:italic;color:var(--gold)}
+.hv-light{font-size:11px;color:var(--taupe);line-height:1.4;letter-spacing:.01em}
+@media(max-width:560px){
+  .hero-vals{flex-direction:column;gap:20px}
+  .hv{padding:0}
+  .hv+.hv::before{display:none}
+  .hv+.hv{padding-top:20px;border-top:1px solid var(--border-s)}
+}
+.hero-logos{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;opacity:.7}
+.hero-logo{font-size:11.5px;font-weight:500;color:var(--taupe);padding:5px 14px;background:rgba(192,142,50,.04);border:1px solid rgba(192,142,50,.1);border-radius:100px;white-space:nowrap;transition:all .2s}
+.hero-logo:hover{border-color:var(--gold);color:var(--gold);opacity:1}
+
+/* ═══════════════════════════════════════════════
+   SECTION SHARED TOKENS
+   ═══════════════════════════════════════════════ */
+section{padding:112px 2rem}
+.si{max-width:1060px;margin:0 auto}
+.s-eye{
+  font-family:var(--mono);font-size:10px;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--gold);
+  margin-bottom:1.2rem;display:flex;align-items:center;gap:10px;
+}
+.s-eye::before{content:'';display:block;width:22px;height:1px;background:var(--gold);opacity:.5}
+.s-title{
+  font-family:var(--serif);font-size:clamp(30px,4.5vw,52px);
+  line-height:1.06;letter-spacing:-0.03em;color:var(--espresso);
+  font-weight:500;margin-bottom:.8rem;
+}
+.s-title em{font-style:italic;color:var(--gold)}
+.s-sub{font-size:15px;color:var(--mocha);font-weight:400;max-width:460px;line-height:1.72}
+
+/* ═══════════════════════════════════════════════
+   PROBLEM SECTION
+   ═══════════════════════════════════════════════ */
+.problem{background:var(--espresso);padding:112px 2rem}
+.problem .s-eye{color:rgba(212,168,72,.7)}.problem .s-eye::before{background:rgba(212,168,72,.4)}
+.problem .s-title{color:var(--cream)}
+.prob-layout{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start}
+@media(max-width:780px){.prob-layout{grid-template-columns:1fr;gap:44px}}
+.prob-copy{font-size:15px;color:rgba(248,244,238,.58);line-height:1.8;margin-top:1.4rem;max-width:420px}
+.prob-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.prob-cards{grid-template-columns:1fr}}
+.prob-card{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:14px;padding:24px 22px;transition:all .3s var(--ease);
+  position:relative;overflow:hidden;
+}
+.prob-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1.5px;
+  background:linear-gradient(90deg,var(--gold),transparent);opacity:0;transition:opacity .3s;
+}
+.prob-card:hover{background:rgba(192,142,50,.08);transform:translateY(-2px)}
+.prob-card:hover::after{opacity:1}
+.prob-card-n{font-family:var(--mono);font-size:9.5px;color:rgba(212,168,72,.45);letter-spacing:.1em;margin-bottom:12px;display:block}
+.prob-card h3{font-family:var(--serif);font-size:21px;color:rgba(248,244,238,.95);line-height:1.18;font-weight:500;margin-bottom:6px;letter-spacing:-.01em}
+.prob-card p{font-size:12.5px;color:rgba(248,244,238,.52);line-height:1.65}
+
+/* Stats strip — light bridge between dark problem and features */
+.stats-strip{background:var(--parchment);padding:72px 2rem;border-bottom:1px solid var(--border-s)}
+.stats-strip-inner{
+  max-width:960px;margin:0 auto;display:flex;align-items:flex-start;
+  justify-content:center;
+}
+@media(max-width:680px){.stats-strip-inner{flex-direction:column;gap:0}}
+.ss-card{flex:1;text-align:center;padding:0 36px;position:relative}
+.ss-card+.ss-card::before{
+  content:'';position:absolute;left:0;top:6px;bottom:6px;width:1px;
+  background:var(--gold);opacity:.18;
+}
+@media(max-width:680px){
+  .ss-card{padding:24px 0}
+  .ss-card+.ss-card::before{left:20%;right:20%;top:0;bottom:auto;width:auto;height:1px}
+}
+.ss-num{font-family:var(--serif);font-size:42px;color:var(--espresso);line-height:1;letter-spacing:-0.025em;margin-bottom:8px;font-weight:500}
+.ss-copy{font-size:14px;color:var(--mocha);line-height:1.6;max-width:220px;margin:0 auto}
+.ss-src{font-family:var(--mono);font-size:8px;color:var(--taupe);letter-spacing:.07em;text-transform:uppercase;margin-top:8px;opacity:.6}
+
+/* ═══════════════════════════════════════════════
+   MID-PAGE CTA BREAK
+   Research: Repeating CTAs mid-page recaptures 
+   scrollers who are already convinced.
+   ═══════════════════════════════════════════════ */
+.cta-break{
+  padding:56px 2rem;background:var(--cream);
+  border-top:1px solid var(--border-s);border-bottom:1px solid var(--border-s);
+  text-align:center;
+}
+.cta-break-inner{
+  max-width:520px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:18px;
+}
+.cta-break p{font-family:var(--serif);font-size:clamp(20px,2.8vw,28px);color:var(--espresso);line-height:1.3;letter-spacing:-0.018em;font-weight:400;font-style:italic}
+.cta-break p strong{font-weight:500;font-style:normal;color:var(--gold)}
+
+/* ═══════════════════════════════════════════════
+   FEATURES
+   ═══════════════════════════════════════════════ */
+.features{background:var(--white);padding:112px 2rem}
+.feat-header{text-align:center;margin-bottom:72px;display:flex;flex-direction:column;align-items:center}
+.feat-header .s-eye{justify-content:center}.feat-header .s-eye::before{display:none}
+.feat-header .s-title{max-width:560px}
+.feat-header .s-sub{text-align:center;margin:0 auto}
+
+/* How steps */
+.how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:16px;overflow:hidden;margin-bottom:0;max-width:1060px;margin-left:auto;margin-right:auto}
+@media(max-width:680px){.how-steps{grid-template-columns:1fr}}
+.how-step{background:var(--cream);padding:36px 32px;transition:background .25s}
+.how-step:hover{background:var(--parchment)}
+.how-n{font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:.12em;margin-bottom:14px;opacity:.5}
+.how-step h3{font-family:var(--serif);font-size:22px;color:var(--espresso);line-height:1.18;font-weight:500;margin-bottom:10px;letter-spacing:-.01em}
+.how-step p{font-size:13.5px;color:var(--mocha);line-height:1.72}
+.feat-modules{display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);border-radius:20px;overflow:hidden}
+.f-mod{display:grid;grid-template-columns:1fr 1fr;background:var(--cream);transition:background .25s;min-height:300px}
+.f-mod:hover{background:var(--parchment)}
+.f-mod.flip{direction:rtl}.f-mod.flip>*{direction:ltr}
+.f-mod-txt{padding:48px 52px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center}
+.f-mod.flip .f-mod-txt{border-right:none;border-left:1px solid var(--border)}
+.f-mod-tag{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.f-mod-tag::before{content:'✦';font-size:7px;opacity:.6}
+.f-mod-h{font-family:var(--serif);font-size:clamp(24px,2.4vw,32px);color:var(--espresso);line-height:1.14;letter-spacing:-0.02em;margin-bottom:14px;font-weight:500}
+.f-mod-h em{font-style:italic;color:var(--gold)}
+.f-mod-p{font-size:14px;color:var(--mocha);line-height:1.76}
+.f-mod-vis{padding:44px 48px;display:flex;flex-direction:column;justify-content:center;background:var(--cream)}
+.f-mod:hover .f-mod-vis{background:var(--parchment)}
+@media(max-width:820px){
+  .f-mod,.f-mod.flip{grid-template-columns:1fr;direction:ltr}
+  .f-mod-txt,.f-mod.flip .f-mod-txt{border-right:none;border-left:none;border-bottom:1px solid var(--border);padding:36px 28px}
+  .f-mod-vis{padding:28px 28px 40px}
+}
+
+/* Vis: Morning Brief */
+.vis-brief{display:flex;flex-direction:column;gap:6px}
+.vb-date{font-family:var(--mono);font-size:9.5px;color:var(--taupe);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.vb-row{display:flex;align-items:center;gap:10px;padding:9px 13px;background:var(--white);border:1px solid var(--border);border-radius:10px;transition:all .2s}
+.vb-row:hover{border-color:var(--gold);transform:translateX(3px)}
+.vb-time{font-family:var(--mono);font-size:10.5px;color:var(--taupe);width:42px;flex-shrink:0}
+.vb-av{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#fff}
+.vb-inf{flex:1;min-width:0}
+.vb-nm{font-size:12px;font-weight:600;color:var(--espresso);letter-spacing:.01em}
+.vb-sv{font-size:10px;color:var(--taupe);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vb-b{font-size:8.5px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;letter-spacing:.03em}
+.b-r{background:rgba(180,48,48,.1);color:var(--r)}
+.b-g{background:rgba(192,142,50,.1);color:var(--gold)}
+.b-gr{background:rgba(44,122,78,.1);color:var(--g)}
+.b-b{background:rgba(24,96,152,.1);color:var(--b)}
+
+/* Vis: Revenue */
+.vis-rev{background:var(--espresso);border-radius:14px;padding:20px 22px}
+.vr-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.vr-lbl{font-size:10px;color:rgba(248,244,238,.3);letter-spacing:.07em;text-transform:uppercase;font-family:var(--mono)}
+.vr-amt{font-family:var(--serif);font-size:28px;color:var(--gold-l);line-height:1}
+.vr-track{height:4px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin-bottom:7px}
+.vr-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--gold-l));width:0;transition:width 1.6s var(--ease)}
+.vr-meta{display:flex;justify-content:space-between;font-size:10px;margin-bottom:14px}
+.vr-meta span:first-child{color:rgba(248,244,238,.28)}
+.vr-meta span:last-child{color:#5EBF7B}
+.vr-rows{display:flex;flex-direction:column;gap:4px}
+.vr-row{display:flex;align-items:center;justify-content:space-between;padding:7px 11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05);border-radius:8px;transition:background .2s}
+.vr-row:hover{background:rgba(255,255,255,.07)}
+.vr-rnm{font-size:11px;color:rgba(248,244,238,.65);font-weight:500}
+.vr-rsb{font-size:9.5px;color:rgba(248,244,238,.28);margin-top:1px}
+.vr-rv{font-size:11.5px;color:#5EBF7B;font-weight:600;font-family:var(--mono)}
+
+/* ═══════════════════════════════════════════════
+   CLIENT INTELLIGENCE — the hero section
+   Combined: shows product in action with real personas.
+   Research: "Show the product" is the #1 differentiator
+   for high-converting SaaS pages.
+   ═══════════════════════════════════════════════ */
+.intel{background:var(--cream);padding:112px 2rem;border-top:1px solid var(--border-s)}
+.intel-header{text-align:center;margin-bottom:64px;display:flex;flex-direction:column;align-items:center}
+.intel-header .s-eye{justify-content:center}.intel-header .s-eye::before{display:none}
+.intel-header .s-title{max-width:560px}
+.intel-header .s-sub{text-align:center;margin:0 auto}
+.intel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+@media(max-width:780px){.intel-grid{grid-template-columns:1fr}}
+.ic{
+  background:var(--white);border-radius:20px;overflow:hidden;
+  border:1px solid var(--border);transition:all .3s var(--ease);
+  display:flex;flex-direction:column;
+}
+.ic:hover{transform:translateY(-4px);box-shadow:0 24px 56px rgba(26,19,16,.08)}
+.ic-strip{height:3px;width:100%}
+.ic.attention .ic-strip{background:var(--r)}
+.ic.nurture .ic-strip{background:var(--gold)}
+.ic-head{padding:22px 24px 18px;border-bottom:1px solid var(--border-s)}
+.ic-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.ic-av{
+  width:40px;height:40px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;
+}
+.ic-info{flex:1}
+.ic-name{font-family:var(--serif);font-size:22px;color:var(--espresso);font-weight:500;line-height:1.1;margin-bottom:3px;letter-spacing:-.01em}
+.ic-meta{font-size:11px;color:var(--taupe);letter-spacing:.01em}
+.ic-badge{
+  font-family:var(--mono);font-size:9px;font-weight:600;padding:4px 11px;
+  border-radius:100px;letter-spacing:.06em;text-transform:uppercase;
+  flex-shrink:0;white-space:nowrap;
+}
+.ic.attention .ic-badge{background:var(--r-bg);color:var(--r);border:1px solid var(--r-br)}
+.ic.nurture .ic-badge{background:rgba(192,142,50,.1);color:var(--gold);border:1px solid rgba(192,142,50,.2)}
+.ic-pills{display:flex;flex-wrap:wrap;gap:5px}
+.ic-pill{
+  font-size:10.5px;color:var(--mocha);background:var(--cream);
+  padding:4px 10px;border-radius:6px;border:1px solid var(--border-s);
+  font-weight:500;white-space:nowrap;
+}
+.ic-pill strong{font-weight:600;color:var(--espresso)}
+.ic-body{padding:18px 24px 24px;flex:1;display:flex;flex-direction:column;gap:8px}
+.ic-ins{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;line-height:1.6;padding:10px 13px;border-radius:10px;border:1px solid}
+.ic-ins .ic-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.ic-ins.alert{background:var(--r-bg);border-color:var(--r-br);color:var(--r)}
+.ic-ins.alert .ic-dot{background:var(--r)}
+.ic-ins.info{background:var(--b-bg);border-color:var(--b-br);color:var(--b)}
+.ic-ins.info .ic-dot{background:var(--b)}
+.ic-ins.good{background:var(--g-bg);border-color:var(--g-br);color:var(--g)}
+.ic-ins.good .ic-dot{background:var(--g)}
+.ic-ins.warn{background:var(--a-bg);border-color:var(--a-br);color:var(--a)}
+.ic-ins.warn .ic-dot{background:var(--a)}
+
+/* ═══════════════════════════════════════════════
+   SOCIAL PROOF QUOTE
+   ═══════════════════════════════════════════════ */
+.proof{background:var(--parchment);padding:96px 2rem}
+.proof-inner{max-width:700px;margin:0 auto;text-align:center;display:flex;flex-direction:column;align-items:center}
+.proof-mark{font-family:var(--serif);font-size:80px;color:var(--gold);line-height:.7;opacity:.2}
+.proof-quote{font-family:var(--serif);font-size:clamp(24px,3.8vw,42px);color:var(--espresso);line-height:1.25;letter-spacing:-0.022em;font-weight:400;font-style:italic;margin-bottom:1.4rem;max-width:600px}
+.proof-quote strong{font-weight:600;font-style:normal;color:var(--gold)}
+.proof-attr{font-size:11px;color:var(--taupe);font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase}
+
+/* ═══════════════════════════════════════════════
+   ROI STRIP
+   ═══════════════════════════════════════════════ */
+.roi{background:var(--espresso);padding:88px 2rem}
+.roi-inner{max-width:1060px;margin:0 auto;text-align:center}
+.roi-headline{font-family:var(--serif);font-size:clamp(28px,4vw,46px);color:var(--cream);line-height:1.14;letter-spacing:-0.025em;font-weight:500;margin-bottom:12px}
+.roi-headline em{font-style:italic;color:var(--gold-l)}
+.roi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-radius:16px;overflow:hidden;border:1px solid rgba(192,142,50,.1)}
+@media(max-width:680px){.roi-grid{grid-template-columns:1fr}}
+.roi-card{background:rgba(192,142,50,.03);padding:36px 28px;text-align:center;transition:background .25s;position:relative}
+.roi-card+.roi-card::before{
+  content:'';position:absolute;left:0;top:20%;bottom:20%;width:1px;
+  background:rgba(192,142,50,.15);
+}
+@media(max-width:680px){
+  .roi-card+.roi-card::before{left:15%;right:15%;top:0;bottom:auto;width:auto;height:1px}
+}
+.roi-card:hover{background:rgba(192,142,50,.08)}
+.roi-n{font-family:var(--serif);font-size:48px;color:var(--gold-l);line-height:1;letter-spacing:-0.02em;margin-bottom:10px;font-weight:500}
+.roi-copy{font-size:14px;color:rgba(248,244,238,.6);line-height:1.6;max-width:240px;margin:0 auto}
+.roi-src{font-family:var(--mono);font-size:8.5px;color:rgba(248,244,238,.25);letter-spacing:.06em;text-transform:uppercase;margin-top:10px}
+
+/* ═══════════════════════════════════════════════
+   WAITLIST — single goal, minimal form
+   Research: 3 fields max. Each extra field drops
+   conversion ~10%.
+   ═══════════════════════════════════════════════ */
+.waitlist{padding:112px 2rem;text-align:center}
+.waitlist .s-eye{justify-content:center}.waitlist .s-eye::before{display:none}
+.wbox{
+  max-width:480px;margin:2.2rem auto 0;background:var(--white);
+  border:1px solid var(--border);border-radius:20px;padding:2.5rem 2rem;
+  box-shadow:0 24px 64px rgba(26,19,16,.05);
+}
+.frow{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.fcols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.fcols{grid-template-columns:1fr}}
+.frow label{font-size:11.5px;font-weight:600;color:var(--espresso);letter-spacing:.05em;text-transform:uppercase}
+.frow input,.frow select{
+  font-family:var(--sans);font-size:14px;padding:12px 15px;
+  border:1px solid var(--border);border-radius:10px;
+  background:var(--cream);color:var(--ink);outline:none;
+  transition:all .2s;appearance:none;-webkit-appearance:none;
+}
+.frow select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23A89078' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer;
+}
+.frow input:focus,.frow select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(192,142,50,.08)}
+.frow input::placeholder{color:var(--sand)}
+.sbtn{
+  width:100%;padding:14px;font-family:var(--sans);font-size:13.5px;
+  font-weight:600;color:var(--cream);background:var(--espresso);
+  border:none;border-radius:100px;cursor:pointer;
+  transition:all .28s var(--ease);margin-top:6px;letter-spacing:.03em;
+}
+.sbtn:hover{background:var(--gold);transform:translateY(-1px);box-shadow:0 12px 32px rgba(192,142,50,.28)}
+.fnote{font-size:11px;color:var(--taupe);margin-top:16px;line-height:1.55;letter-spacing:.01em}
+.success-state{display:none;text-align:center;padding:2rem 0}
+.success-mark{font-size:28px;color:var(--gold);margin-bottom:14px}
+.success-state h3{font-family:var(--serif);font-size:26px;color:var(--espresso);margin-bottom:8px;font-weight:500}
+.success-state p{font-size:14px;color:var(--mocha)}
+
+/* ═══════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════ */
+footer{
+  background:var(--espresso);padding:28px 56px;display:flex;
+  align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;
+}
+.footer-logo{font-family:var(--serif);font-size:20px;color:rgba(248,244,238,.4);letter-spacing:-0.02em;font-weight:500}
+.footer-logo span{color:var(--gold-l);font-style:italic}
+.footer-copy{font-size:11px;color:rgba(248,244,238,.18);font-family:var(--mono);letter-spacing:.04em}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:11px;color:rgba(248,244,238,.22);text-decoration:none;transition:color .2s;font-family:var(--mono);letter-spacing:.04em}
+.footer-links a:hover{color:var(--gold-l)}
+
+/* ═══════════════════════════════════════════════
+   ANIMATIONS — staggered reveals on scroll
+   ═══════════════════════════════════════════════ */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .65s var(--ease),transform .65s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.reveal-l{opacity:0;transform:translateX(-18px);transition:opacity .65s var(--ease),transform .65s var(--ease)}
+.reveal-l.in{opacity:1;transform:none}
+.reveal-r{opacity:0;transform:translateX(18px);transition:opacity .65s var(--ease),transform .65s var(--ease)}
+.reveal-r.in{opacity:1;transform:none}
+[data-d="1"]{transition-delay:.07s}
+[data-d="2"]{transition-delay:.14s}
+[data-d="3"]{transition-delay:.21s}
+[data-d="4"]{transition-delay:.28s}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════ */
+@media(max-width:760px){
+  nav{padding:0 24px}footer{padding:24px}
+  section,.problem,.features,.intel,.proof,.roi,.waitlist{padding:80px 1.5rem}
+  .stats-strip{padding:56px 1.5rem}
+  .hero{padding:100px 1.5rem 60px}
+  .wbox{padding:2rem 1.25rem}
+  .hero-vals{flex-direction:column;gap:0}
+  .intel-grid{gap:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     NAV
+     ═══════════════════════════════════════ -->
+<nav id="nav">
+  <div class="nav-logo">Lumi<span>.</span></div>
+  <div class="nav-right">
+    <a class="nav-link" onclick="go('features')">How it works</a>
+    <a class="nav-link" onclick="go('intel')">See it in action</a>
+    <button class="nav-cta" onclick="go('waitlist')">Join Waitlist</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     HERO
+     Benefit-first headline. One clear CTA.
+     Social proof stats + integration logos
+     directly in the hero.
+     ═══════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-eyebrow"><div class="e-dot"></div>Private beta — now accepting applications</div>
+  <h1>Know every client<br>before they <em>walk in.</em></h1>
+  <p class="hero-sub">Lumi is a dashboard that connects to your booking software and briefs your team every morning — client history, risk signals, and what to say, ready before the first appointment.</p>
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="go('waitlist')">Request early access</button>
+    <button class="btn-ghost" onclick="go('features')">See how it works</button>
+  </div>
+  <div class="hero-proof">
+    <div class="hero-vals">
+      <div class="hv">
+        <div class="hv-strong">15 <em>min</em></div>
+        <div class="hv-light">to connect to your booking software</div>
+      </div>
+      <div class="hv">
+        <div class="hv-strong">Every <em>morning</em></div>
+        <div class="hv-light">a prioritized brief, ready before doors open</div>
+      </div>
+      <div class="hv">
+        <div class="hv-strong">One <em>dashboard</em></div>
+        <div class="hv-light">no new tools to learn, no workflow to change</div>
+      </div>
+    </div>
+    <div class="hero-logos">
+      <div class="hero-logo">Boulevard</div>
+      <div class="hero-logo">MangoMint</div>
+      <div class="hero-logo">Zenoti</div>
+      <div class="hero-logo">Mindbody</div>
+      <div class="hero-logo">Jane App</div>
+      <div class="hero-logo">Vagaro</div>
+      <div class="hero-logo">Aesthetic Record</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     PROBLEM
+     ═══════════════════════════════════════ -->
+<section class="problem" id="problem">
+  <div class="si">
+    <div class="prob-layout">
+      <div class="reveal-l">
+        <div class="s-eye">The gap no one talks about</div>
+        <h2 class="s-title">Your team cares. They just walk in <em>cold.</em></h2>
+        <p class="prob-copy">Everything your team needs to deliver a personal experience — client history, visit cadence, what matters to each person — is already in your booking software. But it never reaches them in the moments that actually shape the relationship.</p>
+      </div>
+      <div class="prob-cards reveal-r">
+        <div class="prob-card">
+          <span class="prob-card-n">01</span>
+          <h3>Every provider walks in different</h3>
+          <p>One remembers everything. Another asks "so what are we doing today?" The experience depends on who's working — not a system backing them up.</p>
+        </div>
+        <div class="prob-card">
+          <span class="prob-card-n">02</span>
+          <h3>Clients leave without a word</h3>
+          <p>Only 1 in 26 unhappy clients will ever tell you. The rest just stop booking. By the time you notice the pattern, the relationship is already gone.</p>
+        </div>
+        <div class="prob-card">
+          <span class="prob-card-n">03</span>
+          <h3>The right moment passes in silence</h3>
+          <p>A one-year milestone goes unacknowledged. A membership renewal slips by. Not because your team doesn't care — because nothing surfaced it for them.</p>
+        </div>
+        <div class="prob-card">
+          <span class="prob-card-n">04</span>
+          <h3>You know what to do — but can't scale it</h3>
+          <p>You've built the culture. You've trained the team. But personalization that depends on individual memory breaks the moment you're not in the room.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats strip — light bridge between problem and solution -->
+<div class="stats-strip">
+  <div class="stats-strip-inner reveal">
+    <div class="ss-card">
+      <div class="ss-num">97%</div>
+      <div class="ss-copy">of clients rebook more often when the experience feels personal</div>
+      <div class="ss-src">Zenoti 2024 Consumer Survey</div>
+    </div>
+    <div class="ss-card">
+      <div class="ss-num">22%</div>
+      <div class="ss-copy">of medspa bookings end in cancellation — most preventable with one timely touchpoint</div>
+      <div class="ss-src">AmSpa 2025 Retention Report</div>
+    </div>
+    <div class="ss-card">
+      <div class="ss-num">5×</div>
+      <div class="ss-copy">more expensive to win a new client than to keep the one already yours</div>
+      <div class="ss-src">Forbes / Bain & Company</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MID-PAGE CTA BREAK
+     ═══════════════════════════════════════ -->
+<div class="cta-break reveal">
+  <div class="cta-break-inner">
+    <p>Already convinced? <strong>Skip the tour.</strong></p>
+    <button class="btn-primary" onclick="go('waitlist')">Request early access</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     FEATURES
+     3 core modules with live UI previews
+     ═══════════════════════════════════════ -->
+<section class="features" id="features">
+  <div class="si">
+    <div class="feat-header reveal">
+      <div class="s-eye">How Lumi works</div>
+      <h2 class="s-title">Set up once. <em>Briefed every morning.</em></h2>
+    </div>
+
+    <!-- 3-step process — the missing "what IS this?" -->
+    <div class="how-steps reveal" data-d="1">
+      <div class="how-step">
+        <div class="how-n">01 · one-time</div>
+        <h3>Connect your booking software</h3>
+        <p>Boulevard, Zenoti, Mindbody, or whichever system you already use. A single 15-minute setup. Your data stays where it is — Lumi just reads it.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-n">02 · every morning</div>
+        <h3>Your team opens the Lumi dashboard</h3>
+        <p>One screen. Every client on today's schedule, already analyzed — flagged by priority, enriched with history, and ready for your team to act on.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-n">03 · every appointment</div>
+        <h3>Every provider walks in prepared</h3>
+        <p>No digging through profiles. No improvising. Each appointment has a care brief — so every interaction feels personal, no matter who's working.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:72px">
+    <div class="feat-header reveal">
+      <div class="s-eye">What it looks like</div>
+      <h2 class="s-title">The intelligence layer,<br><em>in action.</em></h2>
+    </div>
+    </div>
+
+    <div class="feat-modules">
+
+      <!-- Morning Intelligence -->
+      <div class="f-mod reveal">
+        <div class="f-mod-txt">
+          <div class="f-mod-tag">The dashboard · morning view</div>
+          <h3 class="f-mod-h">Your day, <em>briefed.</em></h3>
+          <p class="f-mod-p">Before your team opens the door, the Lumi dashboard has already read today's schedule. It flags which clients need a personal touch, which memberships are at risk, and which appointments have untapped potential.</p>
+        </div>
+        <div class="f-mod-vis">
+          <div class="vis-brief">
+            <div class="vb-date">Today · Thursday · 9 appointments</div>
+            <div class="vb-row">
+              <div class="vb-time">10:00</div>
+              <div class="vb-av" style="background:linear-gradient(135deg,#D4897A,#E8B0A4)">SL</div>
+              <div class="vb-inf"><div class="vb-nm">Sophia Laurent</div><div class="vb-sv">Hydrafacial · Member 14 mo.</div></div>
+              <div class="vb-b b-r">Needs attention</div>
+            </div>
+            <div class="vb-row">
+              <div class="vb-time">11:30</div>
+              <div class="vb-av" style="background:linear-gradient(135deg,#6E9470,#A8C5AB)">YN</div>
+              <div class="vb-inf"><div class="vb-nm">Yuki Nakamura</div><div class="vb-sv">Chemical Peel · Platinum</div></div>
+              <div class="vb-b b-g">Gift due today</div>
+            </div>
+            <div class="vb-row">
+              <div class="vb-time">2:00</div>
+              <div class="vb-av" style="background:linear-gradient(135deg,#5A8CA8,#A8C8E0)">MT</div>
+              <div class="vb-inf"><div class="vb-nm">Marcus Tran</div><div class="vb-sv">Botox · 6th visit · No membership</div></div>
+              <div class="vb-b b-b">Membership ready</div>
+            </div>
+            <div class="vb-row">
+              <div class="vb-time">3:30</div>
+              <div class="vb-av" style="background:linear-gradient(135deg,#9B8BB4,#C4B8D8)">PK</div>
+              <div class="vb-inf"><div class="vb-nm">Priya Kapoor</div><div class="vb-sv">Microneedling · 8 months</div></div>
+              <div class="vb-b b-gr">Thriving</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Revenue -->
+      <div class="f-mod flip reveal">
+        <div class="f-mod-txt">
+          <div class="f-mod-tag">The dashboard · revenue view</div>
+          <h3 class="f-mod-h">Live revenue with <em>daily care</em> opportunities.</h3>
+          <p class="f-mod-p">Lumi sets a daily goal based on your schedule and tracks actuals in real time. Your team sees what's confirmed, projected, and where untapped potential sits — updated throughout the day.</p>
+        </div>
+        <div class="f-mod-vis">
+          <div class="vis-rev">
+            <div class="vr-hdr"><span class="vr-lbl">Today's revenue goal</span><span class="vr-amt">$4,200</span></div>
+            <div class="vr-track"><div class="vr-fill" id="vr-fill"></div></div>
+            <div class="vr-meta"><span>Confirmed: $2,814</span><span>Potential: +$1,386</span></div>
+            <div class="vr-rows">
+              <div class="vr-row"><div><div class="vr-rnm">Sophia L. — in 20 min</div><div class="vr-rsb">Ready for next treatment step</div></div><div class="vr-rv">+$85</div></div>
+              <div class="vr-row"><div><div class="vr-rnm">Marcus T. — 2:00 PM</div><div class="vr-rsb">Complementary service opportunity</div></div><div class="vr-rv">+$220</div></div>
+              <div class="vr-row"><div><div class="vr-rnm">Priya K. — 3:30 PM</div><div class="vr-rsb">Membership renewal check-in</div></div><div class="vr-rv">+$180</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     CLIENT INTELLIGENCE — "See it in action"
+     The strongest feature: shows Lumi's actual
+     output per client. Two cards, tight layout.
+     ═══════════════════════════════════════ -->
+<section class="intel" id="intel">
+  <div class="si">
+    <div class="intel-header reveal">
+      <div class="s-eye">Client intelligence</div>
+      <h2 class="s-title">Every client gets a <em>care brief.</em></h2>
+      <p class="s-sub">This is what your team sees on the Lumi dashboard before Sophia walks in at 10 AM — or Marcus sits down at 2 PM. Not a chart. Not a profile. A brief with exactly what to do and why.</p>
+    </div>
+
+    <div class="intel-grid">
+
+      <!-- Sophia — needs attention -->
+      <div class="ic attention reveal" data-d="1">
+        <div class="ic-strip"></div>
+        <div class="ic-head">
+          <div class="ic-top">
+            <div class="ic-av" style="background:linear-gradient(135deg,#F5E0DA,#E8C0B4);color:#A0524A">SL</div>
+            <div class="ic-info"><div class="ic-name">Sophia Laurent</div><div class="ic-meta">Member · 14 months · 10:00 AM today</div></div>
+            <div class="ic-badge">Needs attention</div>
+          </div>
+          <div class="ic-pills">
+            <div class="ic-pill">Last visit: <strong>38 days ago</strong></div>
+            <div class="ic-pill">Avg ticket: <strong>$210</strong></div>
+            <div class="ic-pill">Renews: <strong>13 days</strong></div>
+          </div>
+        </div>
+        <div class="ic-body">
+          <div class="ic-ins alert"><div class="ic-dot"></div><p>19 days past her usual cadence. Membership renews in 13 days — risk of cancellation is high if she doesn't rebook today.</p></div>
+          <div class="ic-ins info"><div class="ic-dot"></div><p>Her last 3 visits were Hydrafacials. LED therapy is a natural next step in her skin journey — worth a gentle mention.</p></div>
+          <div class="ic-ins good"><div class="ic-dot"></div><p>1-year milestone in 2 weeks. Naming it makes her feel genuinely valued.</p></div>
+        </div>
+      </div>
+
+      <!-- Marcus — ready to deepen -->
+      <div class="ic nurture reveal" data-d="2">
+        <div class="ic-strip"></div>
+        <div class="ic-head">
+          <div class="ic-top">
+            <div class="ic-av" style="background:linear-gradient(135deg,#E2EEF8,#C4DAF0);color:#185FA5">MT</div>
+            <div class="ic-info"><div class="ic-name">Marcus Tran</div><div class="ic-meta">Guest · 6 visits · 2:00 PM today</div></div>
+            <div class="ic-badge">Ready to deepen</div>
+          </div>
+          <div class="ic-pills">
+            <div class="ic-pill">Last visit: <strong>21 days ago</strong></div>
+            <div class="ic-pill">Avg ticket: <strong>$480</strong></div>
+            <div class="ic-pill">Membership: <strong>None yet</strong></div>
+          </div>
+        </div>
+        <div class="ic-body">
+          <div class="ic-ins info"><div class="ic-dot"></div><p>6 visits, no membership. At his cadence, he'd save ~$190/quarter as a member. Worth a genuine conversation.</p></div>
+          <div class="ic-ins good"><div class="ic-dot"></div><p>Clients with his profile who've explored filler have had excellent results — a natural conversation starter today.</p></div>
+          <div class="ic-ins warn"><div class="ic-dot"></div><p>No retail in 6 visits. Post-Botox SPF would extend his results — and he hasn't heard it yet.</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SOCIAL PROOF QUOTE
+     ═══════════════════════════════════════ -->
+<section class="proof">
+  <div class="proof-inner reveal">
+    <div class="proof-mark">"</div>
+    <div class="proof-quote">The difference between a good medspa and a great one was never the treatments. It's whether every client feels genuinely <strong>known.</strong></div>
+    <div class="proof-attr">— From a care coordinator who got tired of walking in cold</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     ROI
+     ═══════════════════════════════════════ -->
+<section class="roi" id="roi">
+  <div class="roi-inner">
+    <h2 class="roi-headline reveal">Client retention isn't good for the business.<br><em>It is the business.</em></h2>
+    <p style="font-size:14.5px;color:rgba(248,244,238,.55);max-width:440px;margin:-.5rem auto 44px;text-align:center;line-height:1.7" class="reveal">The practices that win aren't adding more services. They're keeping the clients they already have. Lumi makes that systematic.</p>
+    <div class="roi-grid reveal" data-d="1">
+      <div class="roi-card">
+        <div class="roi-n">67%</div>
+        <div class="roi-copy">more revenue from repeat clients vs. new ones — the clients Lumi helps you keep</div>
+        <div class="roi-src">Bain & Company</div>
+      </div>
+      <div class="roi-card">
+        <div class="roi-n">20–30%</div>
+        <div class="roi-copy">of medspa revenue from memberships — the relationships Lumi protects from silent churn</div>
+        <div class="roi-src">PatientNow 2025</div>
+      </div>
+      <div class="roi-card">
+        <div class="roi-n">$2M</div>
+        <div class="roi-copy">average single-location revenue — and the gap between that and what most earn is retention</div>
+        <div class="roi-src">Boulevard 2025</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     WAITLIST
+     ═══════════════════════════════════════ -->
+<section class="waitlist" id="waitlist">
+  <div class="si">
+    <div class="s-eye reveal">Private beta — limited spots</div>
+    <h2 class="s-title reveal" data-d="1" style="text-align:center;margin:0 auto .6rem;max-width:460px">Join the <em>waitlist.</em></h2>
+    <p class="s-sub reveal" data-d="2" style="text-align:center;margin:0 auto">Early access, locked-in pricing, and a hands-on setup call with our team.</p>
+    <div class="wbox reveal" data-d="3">
+      <div id="signup-form">
+        <div class="frow"><label for="fname">Your name</label><input type="text" id="fname" name="name" placeholder="Elena Moreau" required/></div>
+        <div class="frow"><label for="email">Work email</label><input type="email" id="email" name="email" placeholder="elena@yourspa.com" required/></div>
+        <div class="fcols">
+          <div class="frow"><label for="spa">Medspa name</label><input type="text" id="spa" name="medspa" placeholder="Lumière Medical Aesthetics"/></div>
+          <div class="frow">
+            <label for="software">Booking software</label>
+            <select id="software" name="booking_software"><option value="">Select yours</option><option value="Boulevard">Boulevard</option><option value="MangoMint">MangoMint</option><option value="Zenoti">Zenoti</option><option value="Mindbody">Mindbody</option><option value="Jane App">Jane App</option><option value="Vagaro">Vagaro</option><option value="Aesthetic Record">Aesthetic Record</option><option value="Other">Other</option></select>
+          </div>
+        </div>
+        <button class="sbtn" type="button" onclick="handleSubmit()">Request early access →</button>
+        <p class="fnote">No credit card required · Setup takes less than 15 minutes · We'll reach out within 2 business days</p>
+      </div>
+      <div class="success-state" id="success-msg">
+        <div class="success-mark">✦</div>
+        <h3>You're on the list.</h3>
+        <p>We'll be in touch within 48 hours with your onboarding details.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Lumi<span>.</span></div>
+  <div class="footer-copy">© 2026 Lumi · Designed from inside the medspa, not outside it</div>
+  <div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a></div>
+</footer>
+
+<script>
+function go(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
+
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',scrollY>40)
+},{passive:true})
+
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})
+},{threshold:0.1,rootMargin:'0px 0px -40px 0px'})
+document.querySelectorAll('.reveal,.reveal-l,.reveal-r').forEach(el=>io.observe(el))
+
+const progObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){setTimeout(()=>{const f=document.getElementById('vr-fill');if(f)f.style.width='67%'},350);progObs.unobserve(e.target)}})
+},{threshold:0.4})
+const revEl=document.querySelector('.vis-rev')
+if(revEl)progObs.observe(revEl)
+
+async function handleSubmit(){
+  const fname=document.getElementById('fname').value.trim()
+  const email=document.getElementById('email').value.trim()
+  const spa=document.getElementById('spa').value.trim()
+  const software=document.getElementById('software').value
+  const btn=document.querySelector('.sbtn')
+  const origText=btn.textContent
+
+  // Validate required fields
+  if(!fname||!email||!email.includes('@')){
+    btn.style.background='var(--r)';btn.textContent='Please fill in your name & email'
+    setTimeout(()=>{btn.style.background='';btn.textContent=origText},2200);return
+  }
+
+  // Show loading state
+  btn.textContent='Submitting...';btn.style.opacity='.7';btn.disabled=true
+
+  try{
+    const res=await fetch('https://formspree.io/f/xpqyjwjd',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        name:fname,
+        email:email,
+        medspa:spa,
+        booking_software:software
+      })
+    })
+
+    if(res.ok){
+      // Success — fade out form, show confirmation
+      const form=document.getElementById('signup-form')
+      form.style.transition='all .35s ease';form.style.opacity='0';form.style.transform='translateY(8px)'
+      setTimeout(()=>{form.style.display='none';const s=document.getElementById('success-msg');s.style.display='block';s.style.animation='fadeUp .5s ease both'},350)
+    }else{
+      // Formspree returned an error
+      btn.style.background='var(--r)';btn.textContent='Something went wrong — try again'
+      btn.style.opacity='1';btn.disabled=false
+      setTimeout(()=>{btn.style.background='';btn.textContent=origText},2500)
+    }
+  }catch(err){
+    // Network error
+    btn.style.background='var(--r)';btn.textContent='Connection error — please try again'
+    btn.style.opacity='1';btn.disabled=false
+    setTimeout(()=>{btn.style.background='';btn.textContent=origText},2500)
+  }
+}
+const st=document.createElement('style')
+st.textContent='@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}'
+document.head.appendChild(st)
+</script>
+</body>
+</html>
